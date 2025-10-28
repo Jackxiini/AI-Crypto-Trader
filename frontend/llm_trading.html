@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Automated Trading System</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --muted: #64748b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            color: var(--muted);
+        }
+        
+        .control-panel {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .control-panel h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+        
+        .llm-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .llm-option {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .llm-option:hover {
+            border-color: var(--primary);
+            background: #f0f9ff;
+        }
+        
+        .llm-option.selected {
+            border-color: var(--primary);
+            background: #dbeafe;
+        }
+        
+        .llm-option h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .llm-option p {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #475569;
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #d97706;
+        }
+        
+        .status-panel {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--danger);
+        }
+        
+        .status-dot.active {
+            background: var(--success);
+        }
+        
+        .positions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .position-card {
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .position-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+        
+        .position-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .position-info span {
+            color: var(--muted);
+        }
+        
+        .position-info strong {
+            color: var(--text);
+        }
+        
+        .log-panel {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .log-panel h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+        
+        .log-content {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.25rem 0;
+        }
+        
+        .log-entry.success {
+            color: #10b981;
+        }
+        
+        .log-entry.error {
+            color: #ef4444;
+        }
+        
+        .log-entry.info {
+            color: #3b82f6;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .api-key-section {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        .api-key-section h3 {
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+        
+        .api-key-inputs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .api-key-inputs input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .api-status {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .ai-decisions-panel, .orders-panel, .trades-panel {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+        
+        .ai-decisions-panel h2, .orders-panel h2, .trades-panel h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+        
+        .order-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .order-card.take-profit {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .order-card.stop-loss {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .order-type {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .order-symbol {
+            font-size: 1.5rem;
+            font-weight: bold;
+            opacity: 0.9;
+        }
+        
+        .order-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+        
+        .order-detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.25rem 0;
+        }
+        
+        .order-detail-label {
+            opacity: 0.8;
+        }
+        
+        .order-detail-value {
+            font-weight: bold;
+        }
+        
+        .trade-entry {
+            background: #f8fafc;
+            border-left: 4px solid #10b981;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .trade-entry.sell {
+            border-left-color: #ef4444;
+        }
+        
+        .trade-time {
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+        
+        .ai-decision-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .ai-decision-card.buy {
+            border-left-color: var(--success);
+        }
+        
+        .ai-decision-card.sell {
+            border-left-color: var(--danger);
+        }
+        
+        .ai-decision-card.hold {
+            border-left-color: var(--secondary);
+        }
+        
+        .decision-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .decision-action {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .decision-action.buy {
+            color: var(--success);
+        }
+        
+        .decision-action.sell {
+            color: var(--danger);
+        }
+        
+        .decision-action.hold {
+            color: var(--secondary);
+        }
+        
+        .decision-details {
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+        
+        .decision-prompt {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>LLM Automated Trading System</h1>
+            <p>Trading with GPT, Gemini, and DeepSeek AI Models</p>
+        </div>
+        
+        <div class="control-panel">
+            <h2>Control Panel</h2>
+            
+            <div class="api-key-section">
+                <h3>API Configuration</h3>
+                <div class="api-key-inputs">
+                    <input type="password" id="openaiKey" placeholder="OpenAI API Key (sk-...)" />
+                    <input type="password" id="geminiKey" placeholder="Gemini API Key" />
+                    <input type="password" id="deepseekKey" placeholder="DeepSeek API Key" />
+                    <button class="btn btn-secondary" id="setApiKeysBtn">Set API Keys</button>
+                </div>
+                <div id="apiStatus" class="api-status">
+                    <span class="status-indicator">
+                        <span class="status-dot" id="openaiStatus"></span>
+                        <span>OpenAI: Not configured</span>
+                    </span>
+                    <span class="status-indicator">
+                        <span class="status-dot" id="geminiStatus"></span>
+                        <span>Gemini: Not configured</span>
+                    </span>
+                    <span class="status-indicator">
+                        <span class="status-dot" id="deepseekStatus"></span>
+                        <span>DeepSeek: Not configured</span>
+                    </span>
+                </div>
+            </div>
+            
+            <div class="llm-selector">
+                <div class="llm-option" data-llm="gpt">
+                    <h3>GPT-5</h3>
+                    <p>OpenAI GPT-5</p>
+                </div>
+                <div class="llm-option selected" data-llm="gemini">
+                    <h3>Gemini 2.5 Flash</h3>
+                    <p>Google AI</p>
+                </div>
+                <div class="llm-option" data-llm="deepseek">
+                    <h3>DeepSeek V3.1</h3>
+                    <p>DeepSeek Chat V3.1</p>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="startBtn">Start Trading</button>
+                <button class="btn btn-danger" id="stopBtn">Stop Trading</button>
+                <button class="btn btn-secondary" id="statusBtn">Refresh Status</button>
+            </div>
+        </div>
+        
+        <div class="status-panel">
+            <h2>Positions</h2>
+            <div class="status-indicator">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText"></span>
+            </div>
+            <div id="statusDetails">
+                <p>LLM Model: Not selected</p>
+            </div>
+            
+            <div class="positions-grid" id="positionsGrid">
+                <!-- Positions will be displayed here -->
+            </div>
+        </div>
+        
+        <div class="log-panel">
+            <h2>Trading Log</h2>
+            <div class="log-content" id="logContent">
+                <div class="log-entry info">...</div>
+            </div>
+        </div>
+        
+        <div class="ai-decisions-panel">
+            <h2>AI Decisions</h2>
+            <div id="globalStrategyContent" style="margin-bottom: 20px; padding: 15px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #2563eb;">
+                <p>Global trading strategy will appear here...</p>
+            </div>
+            
+            <h2>AI Actions</h2>
+            <div id="aiDecisionsContent">
+                <p>AI trading decisions will appear here...</p>
+            </div>
+        </div>
+        
+        <div class="analysis-history-panel">
+            <h2>Analysis History</h2>
+            <div id="analysisHistoryContent">
+                <p>...</p>
+            </div>
+        </div>
+        
+        <div class="orders-panel">
+            <h2>Pending Orders</h2>
+            <div id="pendingOrdersContent">
+                <p></p>
+            </div>
+        </div>
+        
+        <div class="trades-panel">
+            <h2>Recent Trades</h2>
+            <div id="filledOrdersContent">
+                <p></p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let selectedLLM = 'gemini'; // Default: Gemini
+        let tradingActive = false;
+        
+        // API Key Management
+        document.getElementById('setApiKeysBtn').addEventListener('click', async function() {
+            const openaiKey = document.getElementById('openaiKey').value;
+            const geminiKey = document.getElementById('geminiKey').value;
+            const deepseekKey = document.getElementById('deepseekKey').value;
+            
+            if (!openaiKey && !geminiKey && !deepseekKey) {
+                alert('Please provide at least one API key');
+                return;
+            }
+            
+            this.classList.add('loading');
+            try {
+                const response = await fetch('/llm-trading/set-api-keys', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        openai_key: openaiKey || null,
+                        gemini_key: geminiKey || null,
+                        deepseek_key: deepseekKey || null
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    addLog('API keys configured successfully', 'success');
+                    updateApiStatus();
+                } else {
+                    addLog(`API key configuration failed: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addLog(`API key configuration error: ${error.message}`, 'error');
+            } finally {
+                this.classList.remove('loading');
+            }
+        });
+        
+        // LLM
+        document.querySelectorAll('.llm-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.llm-option').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedLLM = this.dataset.llm;
+                addLog(`Selected ${this.dataset.llm.toUpperCase()} model`, 'info');
+            });
+        });
+        
+        // 
+        document.getElementById('startBtn').addEventListener('click', async function() {
+            if (!selectedLLM) {
+                alert('Please select an LLM model');
+                return;
+            }
+            
+            this.classList.add('loading');
+            try {
+                const response = await fetch('/llm-trading/start?llm_type=' + selectedLLM, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    tradingActive = true;
+                    const startMessage = result.message || `Trading started with ${selectedLLM.toUpperCase()}`;
+                    updateStatus(true, startMessage);
+                    addLog(startMessage, 'success');
+                    addLog('Starting AI analysis...', 'info');
+                    
+                    // AI
+                    if (result.initial_analysis) {
+                        console.log('AI:', result.initial_analysis);
+                        
+                        // 
+                        if (result.initial_analysis.global_decision) {
+                            displayGlobalStrategy(result.initial_analysis.global_decision);
+                        }
+                        
+                        // 
+                        if (result.initial_analysis.results) {
+                            console.log('AI:', result.initial_analysis.results);
+                            displayAIDecisions(result.initial_analysis.results);
+                            
+                            // 
+                            result.initial_analysis.results.forEach(r => {
+                                if (r.decision) {
+                                    addLog(`${r.symbol}: ${r.decision.action.toUpperCase()} - ${r.decision.reason}`, 'info');
+                                }
+                            });
+                        }
+                    }
+                    
+                    // 
+                    setTimeout(async () => {
+                        try {
+                            const statusResponse = await fetch('/llm-trading/status');
+                            const status = await statusResponse.json();
+                            updatePositions(status.current_positions);
+                            updatePendingOrders(status.pending_orders);
+                            addLog(`Pending orders: ${Object.keys(status.pending_orders || {}).length}`, 'info');
+                        } catch (error) {
+                            console.error(':', error);
+                        }
+                    }, 1000);
+                } else {
+                    addLog(`: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addLog(`: ${error.message}`, 'error');
+            } finally {
+                this.classList.remove('loading');
+            }
+        });
+        
+        // 
+        document.getElementById('stopBtn').addEventListener('click', async function() {
+            if (!tradingActive) {
+                alert('Please stop the current trading plan first');
+                return;
+            }
+            
+            if (!confirm('Are you sure you want to stop trading and close all positions?')) {
+                return;
+            }
+            
+            this.classList.add('loading');
+            try {
+                const response = await fetch('/llm-trading/stop', {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    tradingActive = false;
+                    updateStatus(false, 'Trading stopped');
+                    addLog('Trading stopped successfully', 'success');
+                    result.close_results.forEach(r => {
+                        if (r.success) {
+                            addLog(`Closed ${r.symbol} position: ${r.amount}`, 'info');
+                        } else {
+                            addLog(`Failed to close ${r.symbol}: ${r.error}`, 'error');
+                        }
+                    });
+                    updatePositions();
+                } else {
+                    addLog(`Stop trading failed: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addLog(`Stop error: ${error.message}`, 'error');
+            } finally {
+                this.classList.remove('loading');
+            }
+        });
+        
+        // 
+        document.getElementById('statusBtn').addEventListener('click', async function() {
+            try {
+                const response = await fetch('/llm-trading/status');
+                const status = await response.json();
+                
+                tradingActive = status.trading_plan_active;
+                selectedLLM = status.selected_llm || selectedLLM;
+                const statusMessage = status.selected_llm ? `Trading with ${status.selected_llm.toUpperCase()}` : '';
+                updateStatus(tradingActive, statusMessage);
+                updatePositions(status.current_positions);
+                updatePendingOrders(status.pending_orders);
+                addLog('Status refreshed', 'info');
+            } catch (error) {
+                addLog(`Status check error: ${error.message}`, 'error');
+            }
+        });
+        
+        // 
+        function updateStatus(active, message) {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const statusDetails = document.getElementById('statusDetails');
+            
+            statusDot.classList.toggle('active', active);
+            statusText.textContent = active ? 'ACTIVE' : 'INACTIVE';
+            if (message) {
+                statusDetails.innerHTML = `<p>${message}</p>`;
+            } else {
+                statusDetails.innerHTML = '<p>Not trading</p>';
+            }
+        }
+        
+        // 
+        function updatePositions(positions = null) {
+            const positionsGrid = document.getElementById('positionsGrid');
+            
+            if (!positions) {
+                positionsGrid.innerHTML = '<p>Loading positions...</p>';
+                return;
+            }
+            
+            if (Object.keys(positions).length === 0) {
+                positionsGrid.innerHTML = '<p>No positions</p>';
+                return;
+            }
+            
+            positionsGrid.innerHTML = Object.entries(positions).map(([symbol, position]) => `
+                <div class="position-card">
+                    <h3>${symbol}</h3>
+                    <div class="position-info">
+                        <span>Amount:</span>
+                        <strong>${position.amount.toFixed(6)}</strong>
+                        <span>Value (USDT):</span>
+                        <strong>${position.value_usdt.toFixed(2)}</strong>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // 
+        function addLog(message, type = 'info') {
+            const logContent = document.getElementById('logContent');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logContent.appendChild(logEntry);
+            logContent.scrollTop = logContent.scrollHeight;
+        }
+        
+        // 
+        // 
+        function displayAnalysisHistory(history) {
+            const historyContent = document.getElementById('analysisHistoryContent');
+            
+            if (!history || history.length === 0) {
+                historyContent.innerHTML = '<p>No analysis history</p>';
+                return;
+            }
+            
+            let historyHtml = '<div class="analysis-history-list">';
+            
+            history.forEach((record, index) => {
+                const timestamp = new Date(record.timestamp).toLocaleString();
+                const typeEmoji = record.type === 'immediate' ? '' : (record.type === 'scheduled' ? '⏰' : '');
+                const typeText = record.type === 'immediate' ? '' : (record.type === 'scheduled' ? '' : '');
+                const actionClass = record.action === 'BUY' ? 'action-buy' : (record.action === 'SELL' ? 'action-sell' : 'action-hold');
+                const actionColor = record.action === 'BUY' ? '#10b981' : (record.action === 'SELL' ? '#ef4444' : '#6b7280');
+                
+                historyHtml += `
+                    <div class="analysis-record" style="border-left: 4px solid ${actionColor}; margin-bottom: 15px; padding: 12px; background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 18px;">${typeEmoji}</span>
+                                <strong style="font-size: 16px;">${record.symbol}</strong>
+                                <span class="${actionClass}" style="padding: 3px 8px; border-radius: 4px; font-weight: bold; color: white; background: ${actionColor};">
+                                    ${record.action}
+                                </span>
+                                <span style="color: #6b7280; font-size: 13px;">${typeText}</span>
+                            </div>
+                            <div style="color: #9ca3af; font-size: 13px;">${timestamp}</div>
+                        </div>
+                        
+                        <div style="margin-left: 28px;">
+                            <div style="margin-bottom: 6px; color: #374151;">
+                                <strong>:</strong> ${record.confidence}%
+                            </div>
+                            ${record.entry_price ? `
+                            <div style="margin-bottom: 6px; color: #374151;">
+                                <strong>:</strong> ${record.entry_price.toFixed(2)} USDT
+                            </div>
+                            ` : ''}
+                            ${record.stop_loss ? `
+                            <div style="margin-bottom: 6px; color: #ef4444;">
+                                <strong>:</strong> ${record.stop_loss.toFixed(2)} USDT
+                            </div>
+                            ` : ''}
+                            ${record.take_profit && record.take_profit.length > 0 ? `
+                            <div style="margin-bottom: 6px; color: #10b981;">
+                                <strong>:</strong> ${record.take_profit.map(tp => tp.toFixed(2)).join(', ')} USDT
+                            </div>
+                            ` : ''}
+                            <div style="margin-top: 8px; padding: 8px; background: #f9fafb; border-radius: 6px; font-size: 14px; color: #4b5563;">
+                                <strong>:</strong> ${record.reason}
+                            </div>
+                            ${record.execution_result ? `
+                            <div style="margin-top: 8px; padding: 8px; background: ${record.execution_result.success ? '#f0fdf4' : '#fef2f2'}; border-radius: 6px; font-size: 13px; color: ${record.execution_result.success ? '#166534' : '#991b1b'};">
+                                <strong>:</strong> ${record.execution_result.message}
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            historyHtml += '</div>';
+            historyContent.innerHTML = historyHtml;
+        }
+        
+        function updatePendingOrders(orders) {
+            const pendingOrdersContent = document.getElementById('pendingOrdersContent');
+            
+            if (!orders || Object.keys(orders).length === 0) {
+                pendingOrdersContent.innerHTML = '<p></p>';
+                return;
+            }
+            
+            let ordersHtml = '';
+            
+            // 
+            Object.entries(orders).forEach(([symbol, symbolOrders]) => {
+                if (symbolOrders && symbolOrders.length > 0) {
+                    ordersHtml += `<div class="symbol-orders-group">
+                        <h4>${symbol}</h4>`;
+                    
+                    symbolOrders.forEach(order => {
+                        let orderTypeClass = 'limit-order';
+                        let orderTypeText = ' ';
+                        
+                        if (order.type === 'take_profit') {
+                            orderTypeClass = 'take-profit';
+                            orderTypeText = ' ';
+                        } else if (order.type === 'stop_loss') {
+                            orderTypeClass = 'stop-loss';
+                            orderTypeText = ' ';
+                        } else if (order.type === 'take_profit_stop_loss') {
+                            orderTypeClass = 'take-profit-stop-loss';
+                            orderTypeText = ' ';
+                        }
+                        
+                        const orderTime = new Date(order.timestamp).toLocaleString();
+                        const sideText = order.side === 'buy' ? '' : '';
+                        
+                        ordersHtml += `
+                            <div class="order-card ${orderTypeClass}">
+                                <div class="order-header">
+                                    <span class="order-type">${orderTypeText}</span>
+                                    <span class="order-symbol">${symbol}</span>
+                                </div>
+                                <div class="order-details">
+                                    <div class="order-detail-item">
+                                        <span class="order-detail-label">:</span>
+                                        <span class="order-detail-value">${sideText}</span>
+                                    </div>
+                                    <div class="order-detail-item">
+                                        <span class="order-detail-label">:</span>
+                                        <span class="order-detail-value">${order.amount.toFixed(6)}</span>
+                                    </div>
+                                    <div class="order-detail-item">
+                                        <span class="order-detail-label">:</span>
+                                        <span class="order-detail-value">${order.price.toFixed(2)} USDT</span>
+                                    </div>
+                                    ${order.trigger_price ? `
+                                    <div class="order-detail-item">
+                                        <span class="order-detail-label">:</span>
+                                        <span class="order-detail-value">${order.trigger_price.toFixed(2)} USDT</span>
+                                    </div>
+                                    ` : ''}
+                                    <div class="order-detail-item">
+                                        <span class="order-detail-label">:</span>
+                                        <span class="order-detail-value">${order.status}</span>
+                                    </div>
+                                    <div class="order-detail-item">
+                                        <span class="order-detail-label">:</span>
+                                        <span class="order-detail-value">${orderTime}</span>
+                                    </div>
+                                </div>
+                            </div>`;
+                    });
+                    
+                    ordersHtml += '</div>';
+                }
+            });
+            
+            pendingOrdersContent.innerHTML = ordersHtml;
+        }
+        
+        function updateRecentTrades(trades) {
+            const tradesContent = document.getElementById('tradesContent');
+            
+            if (!trades || Object.keys(trades).length === 0) {
+                tradesContent.innerHTML = '<p></p>';
+                return;
+            }
+            
+            let tradesHtml = '';
+            
+            // 
+            Object.entries(trades).forEach(([symbol, symbolTrades]) => {
+                if (symbolTrades && symbolTrades.length > 0) {
+                    tradesHtml += `<div class="symbol-trades-group">
+                        <h4>${symbol}</h4>`;
+                    
+                    symbolTrades.forEach(trade => {
+                        const sideClass = trade.side === 'buy' ? 'buy' : 'sell';
+                        const sideText = trade.side === 'buy' ? '' : '';
+                        const tradeTime = new Date(trade.timestamp).toLocaleString();
+                        
+                        tradesHtml += `
+                            <div class="trade-entry ${sideClass}">
+                                <div class="trade-header">
+                                    <span class="trade-side">${sideText}</span>
+                                    <span class="trade-symbol">${symbol}</span>
+                                </div>
+                                <div class="trade-details">
+                                    <div class="trade-detail-item">
+                                        <span class="trade-detail-label">:</span>
+                                        <span class="trade-detail-value">${trade.amount.toFixed(6)}</span>
+                                    </div>
+                                    <div class="trade-detail-item">
+                                        <span class="trade-detail-label">:</span>
+                                        <span class="trade-detail-value">${trade.price.toFixed(2)} USDT</span>
+                                    </div>
+                                    <div class="trade-detail-item">
+                                        <span class="trade-detail-label">:</span>
+                                        <span class="trade-detail-value">${trade.cost.toFixed(2)} USDT</span>
+                                    </div>
+                                    <div class="trade-detail-item">
+                                        <span class="trade-detail-label">:</span>
+                                        <span class="trade-detail-value">${trade.fee.toFixed(6)}</span>
+                                    </div>
+                                    <div class="trade-detail-item">
+                                        <span class="order-detail-label">:</span>
+                                        <span class="order-detail-value">${tradeTime}</span>
+                                    </div>
+                                </div>
+                            </div>`;
+                    });
+                    
+                    tradesHtml += '</div>';
+                }
+            });
+            
+            tradesContent.innerHTML = tradesHtml;
+        }
+        
+        // 
+        let filledOrders = [];
+        function addFilledOrder(order) {
+            filledOrders.unshift(order); // 
+            if (filledOrders.length > 20) {
+                filledOrders = filledOrders.slice(0, 20); // 20
+            }
+            updateFilledOrders();
+        }
+        
+        // 
+        function updateFilledOrders() {
+            const filledOrdersContent = document.getElementById('filledOrdersContent');
+            
+            if (filledOrders.length === 0) {
+                filledOrdersContent.innerHTML = '<p></p>';
+                return;
+            }
+            
+            const tradesHtml = filledOrders.map(order => `
+                <div class="trade-entry ${order.side}">
+                    <div>
+                        <strong>${order.symbol}</strong> 
+                        ${order.type === 'take_profit' ? ' ' : ' '} 
+                        ${order.side === 'sell' ? '' : ''} 
+                        ${order.amount.toFixed(6)} @ ${order.price.toFixed(2)} USDT
+                    </div>
+                    <div class="trade-time">${new Date(order.timestamp).toLocaleString()}</div>
+                </div>
+            `).join('');
+            
+            filledOrdersContent.innerHTML = tradesHtml;
+        }
+        
+        // API
+        async function updateApiStatus() {
+            try {
+                const response = await fetch('/llm-trading/api-status');
+                const status = await response.json();
+                
+                const openaiStatus = document.getElementById('openaiStatus');
+                const geminiStatus = document.getElementById('geminiStatus');
+                const deepseekStatus = document.getElementById('deepseekStatus');
+                
+                openaiStatus.classList.toggle('active', status.openai_configured);
+                openaiStatus.nextElementSibling.textContent = `OpenAI: ${status.openai_configured ? '' : ''}`;
+                
+                geminiStatus.classList.toggle('active', status.gemini_configured);
+                geminiStatus.nextElementSibling.textContent = `Gemini: ${status.gemini_configured ? '' : ''}`;
+                
+                deepseekStatus.classList.toggle('active', status.deepseek_configured);
+                deepseekStatus.nextElementSibling.textContent = `DeepSeek: ${status.deepseek_configured ? '' : ''}`;
+            } catch (error) {
+                console.error('API:', error);
+            }
+        }
+        
+        // 
+        function displayGlobalStrategy(globalDecision) {
+            const strategyContent = document.getElementById('globalStrategyContent');
+            
+            if (!globalDecision) {
+                strategyContent.innerHTML = '<p></p>';
+                return;
+            }
+            
+            const totalUsdt = globalDecision.total_available_usdt || 0;
+            const tradingPlanCount = (globalDecision.trading_plan || []).length;
+            const reason = globalDecision.reason || '';
+            const llmModel = globalDecision.llm_model || '';
+            const timestamp = globalDecision.timestamp || '';
+            
+            let strategyHtml = `
+                <div style="margin-bottom: 15px;">
+                    <h3 style="color: #2563eb; margin-bottom: 10px;">Global Analysis Summary</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 15px;">
+                        <div style="background: white; padding: 10px; border-radius: 4px;">
+                            <strong>Total Available:</strong> ${totalUsdt.toFixed(2)} USDT
+                        </div>
+                        <div style="background: white; padding: 10px; border-radius: 4px;">
+                            <strong>Symbols:</strong> ${tradingPlanCount} 
+                        </div>
+                        <div style="background: white; padding: 10px; border-radius: 4px;">
+                            <strong>LLM:</strong> ${llmModel.toUpperCase()}
+                        </div>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 4px; border-left: 3px solid #2563eb;">
+                        <strong>Reasoning:</strong>
+                        <p style="margin: 10px 0 0 0; line-height: 1.6;">${reason}</p>
+                    </div>
+                    ${timestamp ? `<div style="margin-top: 10px; color: #64748b; font-size: 0.9em;">Analysis Time: ${new Date(timestamp).toLocaleString()}</div>` : ''}
+                </div>
+            `;
+            
+            strategyContent.innerHTML = strategyHtml;
+        }
+        
+        // AI
+        function displayAIDecisions(results) {
+            const decisionsContent = document.getElementById('aiDecisionsContent');
+            
+            if (!results || results.length === 0) {
+                decisionsContent.innerHTML = '<p>AI</p>';
+                return;
+            }
+            
+            console.log('AI:', results); // 
+            
+            const decisionsHtml = results.map(result => {
+                if (!result.decision) {
+                    console.log(':', result);
+                    return '';
+                }
+                
+                const decision = result.decision;
+                const action = decision.action || 'hold';
+                const reason = decision.reason || '';
+                const amount = decision.amount_usdt || 0;
+                const targetPrice = decision.target_price || 0;
+                const stopLossPrice = decision.stop_loss_price || 0;
+                
+                console.log(':', { symbol: result.symbol, action, reason });
+                
+                // hold
+                return `
+                    <div class="ai-decision-card ${action}">
+                        <div class="decision-header">
+                            <span class="decision-action ${action}">${action.toUpperCase()}</span>
+                            <span class="decision-symbol">${result.symbol}</span>
+                        </div>
+                        <div class="decision-details">
+                            <div><strong>Reason:</strong> ${reason.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+                            ${amount > 0 ? `<div><strong>Amount:</strong> ${amount} USDT</div>` : ''}
+                            ${targetPrice > 0 ? `<div><strong>Target:</strong> ${targetPrice}</div>` : ''}
+                            ${stopLossPrice > 0 ? `<div><strong>Stop Loss:</strong> ${stopLossPrice}</div>` : ''}
+                        </div>
+                        ${decision.prompt ? `
+                            <details>
+                                <summary>AI</summary>
+                                <div class="decision-prompt">${decision.prompt}</div>
+                            </details>
+                        ` : ''}
+                    </div>
+                `;
+            }).filter(html => html !== '').join('');
+            
+            console.log('HTML:', decisionsHtml);
+            decisionsContent.innerHTML = decisionsHtml || '<p>AI</p>';
+        }
+        
+        // 
+        window.addEventListener('load', function() {
+            updateApiStatus();
+            document.getElementById('statusBtn').click();
+        });
+        
+        // 30
+        setInterval(function() {
+            if (tradingActive) {
+                document.getElementById('statusBtn').click();
+            }
+        }, 30000);
+        
+        // 
+        // 
+        async function autoRefreshStatus() {
+            try {
+                const response = await fetch('/llm-trading/status');
+                const status = await response.json();
+                
+                // 
+                if (status.trading_plan_active) {
+                    // 
+                    updatePendingOrders(status.all_open_orders);
+                    
+                    // 
+                    updateRecentTrades(status.recent_trades);
+                    
+                    // 
+                    updatePositions(status.current_positions);
+                    
+                    //  
+                    if (status.analysis_history && status.analysis_history.length > 0) {
+                        displayAnalysisHistory(status.analysis_history);
+                    }
+                    
+                    console.log(` : ${Object.keys(status.all_open_orders || {}).length}, ${Object.keys(status.recent_trades || {}).length}, ${(status.analysis_history || []).length}`);
+                }
+            } catch (error) {
+                console.error(':', error);
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gemini
+            const geminiOption = document.querySelector('.llm-option[data-llm="gemini"]');
+            if (geminiOption) {
+                geminiOption.classList.add('selected');
+                selectedLLM = 'gemini';
+                addLog('Default model: Gemini', 'info');
+            }
+            
+            // Initialize API status
+            updateApiStatus();
+            updateStatus();
+            
+            // Auto refresh every 5 seconds
+            setInterval(autoRefreshStatus, 5000);
+            addLog('Auto-refresh enabled (5s interval)', 'info');
+        });
+    </script>
+</body>
+</html>
