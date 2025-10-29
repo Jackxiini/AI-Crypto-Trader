@@ -68,7 +68,7 @@ pip install -r requirements.txt
 
 ### 2. Configure Environment
 
-Copy `.env.example` to `.env` and edit with your OKX credentials:
+Copy `.env.example` to `.env` and edit with your OKX credentials. To create your OKX credentials, check [this](https://www.okx.com/docs-v5/en/#overview-api-key-creation):
 
 ```env
 OKX_API_KEY=your_api_key
