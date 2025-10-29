@@ -1,7 +1,7 @@
 <h1 align="center">AI Crypto Trading Platform</h1>
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10%2B-blue" alt="python">
-  <img src="https://img.shields.io/github/Jackxiini/Crypto-AI-Trading/LICENSE" alt="license">
+  <img src="https://img.shields.io/github/license/Jackxiini/AI-Crypto-Trader" alt="license">
 </p>
 
 A cryptocurrency trading automation system powered by Large Language Models (LLM) for OKX exchange.
