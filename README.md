@@ -107,6 +107,7 @@ Choose your preferred AI model by clicking on one of the model cards:
 - **GPT-5** - OpenAI
 - **Gemini 2.5 Flash** - Google AI 
 - **DeepSeek V3.1** - DeepSeek (recommended)
+will support more!
 
 ### 5. Start Automated Trading
 
