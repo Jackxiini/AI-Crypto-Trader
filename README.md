@@ -213,4 +213,4 @@ MIT License
 
 ## Support
 
-For issues, questions, or contributions, please open an issue on GitHub.
+For issues, questions, or contributions, please open an issue.
